@@ -1,0 +1,158 @@
+
+--create table DimDate
+CREATE TABLE DimDate(
+DateKey CHAR(8) PRIMARY KEY,
+CalendarDate DATE,
+Year INT,
+Semester CHAR,
+Quarter CHAR,
+Month INT,
+Day INT,
+MonthLong CHAR (10),
+MonthShort CHAR (3),
+DayName  Char(10),
+DayNameShort Char(3), 
+GreekHoliday VARCHAR(40) NULL,
+IsGreekHoliday CHAR NULL
+);
+
+-- populate table DimDate using PL/SQL procedure
+DECLARE 
+StartDate DATE  := TO_DATE( '2021-01-01', 'yyyy-mm-dd');
+EndDate DATE := TO_DATE('2022-12-31', 'yyyy-mm-dd');
+BEGIN
+WHILE StartDate <= EndDate
+LOOP
+    INSERT INTO DimDate (DateKey, CalendarDate, Year,  Semester, Quarter, Month, Day, MonthLong, MonthShort, DayName, DayNameShort)
+    SELECT
+    TO_CHAR (startdate, 'DDMMYYYY'),
+    Startdate,
+    EXTRACT(YEAR FROM StartDate),
+    case when EXTRACT(MONTH FROM StartDate)>=7 then 2 else 1 end,
+    TO_CHAR(startdate, 'Q'),
+    EXTRACT(MONTH FROM StartDate),
+    EXTRACT(DAY FROM StartDate),
+    TO_CHAR (startdate, 'Month'),
+    TO_CHAR (startdate, 'MON'),
+        TO_CHAR(startdate, 'Day'),
+    TO_CHAR(startdate, 'DY')
+    FROM Dual;
+    
+     StartDate:= StartDate + 1;
+END LOOP;
+END;
+
+--Add GREEK FIXED HOLIDAYS
+	
+---Πρωτοχρονιά
+	UPDATE DimDate
+		SET GreekHoliday  = 'Πρωτοχρονιά'
+	WHERE Month = 1 AND Day = 1;
+    
+--Θεοφάνεια 
+
+UPDATE DimDate
+		SET GreekHoliday  = 'Θεοφάνεια'
+	WHERE Month = 1 AND Day = 6;
+
+-- Ευαγγελισμός Θεοτόκου
+
+UPDATE DimDate
+		SET GreekHoliday  = 'Ευαγγελισμός'
+	WHERE Month = 3 AND Day = 25;
+	
+-- Εργατική Πρωτομαγιά
+
+UPDATE DimDate
+		SET GreekHoliday  = '1η Μάη'
+	WHERE Month = 5 AND Day = 1;
+
+-- Κοίμηση Θεοτόκου
+
+UPDATE DimDate
+		SET GreekHoliday  = 'Της Παναγίας'
+	WHERE Month = 8 AND Day = 15;
+    
+-- ΟΧΙ
+
+UPDATE DimDate
+		SET GreekHoliday  = 'Ημέρα του ΟΧΙ'
+	WHERE Month = 10 AND Day = 28;
+    
+--Χριστούγεννα
+	UPDATE DimDate
+		SET GreekHoliday = 'Χριστούγεννα'
+	WHERE Month = 12 AND Day  = 25;
+    
+-- Δεύτερη Μέρα Χριστουγέννων	
+    UPDATE DimDate
+		SET GreekHoliday = '2η Χριστουγέννων'
+	WHERE Month = 12 AND Day  = 26;
+
+--add Greek Moving Holidays
+
+--Πάσχα (Ορθόδοξο)
+
+UPDATE DimDate
+SET GreekHoliday  = 'Πάσχα'
+	WHERE CalendarDate =
+TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5);
+    
+-- Μ. Σάββατο
+
+UPDATE DimDate
+SET GreekHoliday  = 'Μ. Σάββατο'
+	WHERE CalendarDate =
+TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5) -1;
+
+-- Μ. Παρασκευή
+
+UPDATE DimDate
+SET GreekHoliday  = 'Μ. Παρασκευή'
+	WHERE CalendarDate =
+TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5) -2;
+
+--Δευτέρα του Πάσχα
+
+UPDATE DimDate
+SET GreekHoliday  = 'Δευτέρα του Πάσχα'
+	WHERE CalendarDate =
+TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5) +1;
+
+--Καθαρά Δευτέρα
+
+UPDATE DimDate
+SET GreekHoliday  = 'Καθαρά Δευτέρα'
+	WHERE CalendarDate =
+TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5) -48;
+
+-- Αγ. Πνεύματος
+
+UPDATE DimDate
+SET GreekHoliday  = 'Αγ. Πνεύματος'
+	WHERE CalendarDate =
+TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5) +50;
+
+UPDATE DimDate 
+SET IsGreekHoliday = CASE WHEN GreekHoliday IS NULL THEN 0 WHEN GreekHoliday IS NOT NULL THEN 1 END ;
+-----------------------------------------------------------
+
+
+
+
+--Calculate EASTER DAY FOR EACH YEAR IN TABLE
+
+SELECT distinct TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5)  from DimDate
+    
+	
+--EASTER IN APRIL DAYS αλγόριθμος
+
+SELECT (MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5)  from DimDate
+
