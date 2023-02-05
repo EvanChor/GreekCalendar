@@ -1,0 +1,9 @@
+--Orthodox Easter in April days algorythm 
+
+SELECT (MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5)  from GreekCalendar
+
+--Calculate Easter Day for each year in Table
+
+SELECT distinct TO_DATE(('31/03/'||YEAR), 'DD/MM/YYYY') +
+(MOD((19 * MOD(YEAR,19) + 16), 30) -2) + (MOD(2* MOD(YEAR, 4) +4 * MOD(YEAR, 7) + 6 * MOD((19 * MOD(YEAR,19) + 16), 30), 7) +5)  from GreekCalendar
+    
